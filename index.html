@@ -2,12 +2,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Neon Heart Final</title>
+<title>Neon Heart Fixed</title>
 <style>
-body {
+body{
   margin:0;
   overflow:hidden;
-  background: radial-gradient(circle at center, #040814, #000);
+  background:#000; /* مشکی واقعی */
 }
 canvas{position:absolute;top:0;left:0}
 .signature{
@@ -15,10 +15,9 @@ canvas{position:absolute;top:0;left:0}
   bottom:20px;
   width:100%;
   text-align:center;
-  color:rgba(255,255,255,0.7);
-  text-shadow:0 0 12px cyan;
+  color:rgba(0,255,255,0.6);
+  text-shadow:0 0 15px cyan;
   letter-spacing:4px;
-  font-family:Arial;
 }
 </style>
 </head>
@@ -39,131 +38,79 @@ window.addEventListener('mousemove',e=>{
   mouseY=e.clientY;
 });
 
-function heartPath(size){
-  let points=[];
-  for(let i=0;i<Math.PI*2;i+=0.05){
-    let x=size*16*Math.pow(Math.sin(i),3);
-    let y=-size*(13*Math.cos(i)-5*Math.cos(2*i)-2*Math.cos(3*i)-Math.cos(4*i));
-    points.push({x,y});
-  }
-  return points;
-}
-
-const baseHeart=heartPath(10);
-
 function drawHeart(x,y,scale,rot){
   ctx.save();
   ctx.translate(x,y);
   ctx.rotate(rot);
 
   ctx.beginPath();
-  baseHeart.forEach((p,i)=>{
-    let nx=p.x*scale;
-    let ny=p.y*scale;
-    if(i===0) ctx.moveTo(nx,ny);
-    else ctx.lineTo(nx,ny);
-  });
+  for(let i=0;i<Math.PI*2;i+=0.01){
+    let hx = 15*Math.pow(Math.sin(i),3);
+    let hy = -(12*Math.cos(i)-5*Math.cos(2*i)-2*Math.cos(3*i)-Math.cos(4*i));
+    ctx.lineTo(hx*scale,hy*scale);
+  }
   ctx.closePath();
 
-  // glow
-  ctx.shadowBlur=30+Math.sin(t)*15;
-  ctx.shadowColor="cyan";
+  // glow قوی‌تر
+  ctx.shadowBlur = 60;
+  ctx.shadowColor = "#00f0ff";
 
-  let g=ctx.createRadialGradient(0,0,20,0,0,300);
-  g.addColorStop(0,'#00f0ff');
-  g.addColorStop(1,'#001a2f');
+  let g = ctx.createRadialGradient(0,0,10,0,0,200);
+  g.addColorStop(0,'#00ffff');
+  g.addColorStop(1,'#003344');
 
   ctx.fillStyle=g;
   ctx.fill();
 
-  // veins (energy lines)
-  ctx.strokeStyle='rgba(0,255,255,0.6)';
+  // رگ‌ها (مثل عکس)
+  ctx.strokeStyle='rgba(0,255,255,0.4)';
   ctx.lineWidth=1;
   ctx.beginPath();
-  for(let i=0;i<20;i++){
+  for(let i=0;i<15;i++){
     ctx.moveTo(0,0);
-    let p=baseHeart[Math.floor(Math.random()*baseHeart.length)];
-    ctx.lineTo(p.x*scale,p.y*scale);
+    let angle = Math.random()*Math.PI*2;
+    let r = 80*Math.random();
+    ctx.lineTo(Math.cos(angle)*r, Math.sin(angle)*r);
   }
   ctx.stroke();
 
   ctx.restore();
 }
 
-// particles (stars)
+// ستاره‌ها
 let stars=[];
-for(let i=0;i<250;i++){
+for(let i=0;i<200;i++){
   stars.push({
     x:Math.random()*canvas.width,
     y:Math.random()*canvas.height,
-    z:Math.random()*2,
     s:Math.random()*2
   });
 }
 
 function drawStars(){
   stars.forEach(s=>{
-    let dx=(mouseX-canvas.width/2)*0.0008*s.z;
-    let dy=(mouseY-canvas.height/2)*0.0008*s.z;
-
     ctx.beginPath();
-    ctx.arc(s.x+dx,s.y+dy,s.s,0,Math.PI*2);
+    ctx.arc(s.x,s.y,s.s,0,Math.PI*2);
     ctx.fillStyle='rgba(0,255,255,0.8)';
     ctx.fill();
   });
 }
 
-// lightning
-let bolts=[];
-function createBolt(){
-  bolts.push({life:8});
-}
-
-function drawBolts(){
-  bolts.forEach((b,i)=>{
-    ctx.beginPath();
-    let x=canvas.width/2;
-    let y=canvas.height/2;
-    ctx.moveTo(x,y);
-    for(let j=0;j<12;j++){
-      x+=(Math.random()-0.5)*25;
-      y+=(Math.random()-0.5)*25;
-      ctx.lineTo(x,y);
-    }
-    ctx.strokeStyle='rgba(0,255,255,0.9)';
-    ctx.stroke();
-
-    b.life--;
-    if(b.life<=0) bolts.splice(i,1);
-  });
-}
-
-// cold vapor effect
-function drawVapor(){
-  ctx.fillStyle='rgba(0,255,255,0.05)';
-  ctx.beginPath();
-  ctx.arc(canvas.width/2,canvas.height/2,200+Math.sin(t)*20,0,Math.PI*2);
-  ctx.fill();
-}
-
 function animate(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle = 'rgba(0,0,0,0.25)'; /* فید نرم به جای سفید شدن */
+  ctx.fillRect(0,0,canvas.width,canvas.height);
 
   drawStars();
 
-  if(Math.random()<0.2) createBolt();
+  let scale=6 + Math.sin(t)*0.5;
+  let rot=t*0.1;
 
-  let scale=1+Math.sin(t)*0.08;
-  let rot=t*0.15;
-
-  let dx=(mouseX-canvas.width/2)*0.05;
-  let dy=(mouseY-canvas.height/2)*0.05;
+  let dx=(mouseX-canvas.width/2)*0.03;
+  let dy=(mouseY-canvas.height/2)*0.03;
 
   drawHeart(canvas.width/2+dx,canvas.height/2+dy,scale,rot);
-  drawBolts();
-  drawVapor();
 
-  t+=0.05;
+  t+=0.03;
   requestAnimationFrame(animate);
 }
 
