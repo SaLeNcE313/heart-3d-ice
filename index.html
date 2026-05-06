@@ -2,13 +2,32 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Blue Shader Heart</title>
+<title>Cinematic Blue Heart</title>
+
 <style>
-body { margin:0; overflow:hidden; background:black; }
-canvas { display:block; }
+body {
+  margin:0;
+  overflow:hidden;
+  background: radial-gradient(circle at center, #000010, #000000);
+}
+
+/* امضا سینمایی */
+.signature{
+  position:fixed;
+  bottom:12px;
+  width:100%;
+  text-align:center;
+  color:rgba(120,200,255,0.6);
+  font-family:Arial;
+  font-size:13px;
+  letter-spacing:3px;
+}
 </style>
 </head>
+
 <body>
+
+<div class="signature">MAMALI</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
@@ -19,21 +38,25 @@ const scene = new THREE.Scene();
 
 // Camera
 const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 100);
-camera.position.z = 10;
+camera.position.z = 8;
 
 // Renderer
 const renderer = new THREE.WebGLRenderer({antialias:true});
 renderer.setSize(innerWidth, innerHeight);
 document.body.appendChild(renderer.domElement);
 
-// Light
-const light = new THREE.PointLight(0x4da6ff, 2);
-light.position.set(5,5,5);
-scene.add(light);
+// 🌌 نور سینمایی آبی
+const light1 = new THREE.PointLight(0x4da6ff, 3);
+light1.position.set(5,5,5);
+scene.add(light1);
 
-scene.add(new THREE.AmbientLight(0x002244));
+const light2 = new THREE.PointLight(0x1a75ff, 2);
+light2.position.set(-5,-3,2);
+scene.add(light2);
 
-// Geometry (heart-like parametric shape)
+scene.add(new THREE.AmbientLight(0x001122));
+
+// ❤️ قلب پارامتریک حرفه‌ای
 let heartShape = new THREE.Shape();
 
 heartShape.moveTo(0,0);
@@ -43,45 +66,86 @@ heartShape.bezierCurveTo(0,-5,4,-3,4,0);
 heartShape.bezierCurveTo(4,3,0,3,0,0);
 
 let geometry = new THREE.ExtrudeGeometry(heartShape,{
-  depth:2,
+  depth:2.5,
   bevelEnabled:true,
-  bevelSegments:10,
+  bevelSegments:20,
   steps:2,
   bevelSize:1,
   bevelThickness:1
 });
 
-// Blue glass-like material
+// 💎 متریال سینمایی (کریستالی + نور داخلی)
 let material = new THREE.MeshPhysicalMaterial({
   color:0x4da6ff,
-  metalness:0.2,
-  roughness:0.1,
-  transmission:0.8,
+  metalness:0.1,
+  roughness:0.05,
+  transmission:0.9,
   transparent:true,
   emissive:0x1a75ff,
-  emissiveIntensity:0.7
+  emissiveIntensity:1.2,
+  clearcoat:1,
+  clearcoatRoughness:0.1
 });
 
 let heart = new THREE.Mesh(geometry, material);
 scene.add(heart);
 
-// Animation (beat + glow feel)
+// ✨ ذرات نور (افکت سینمایی)
+let particlesGeometry = new THREE.BufferGeometry();
+let particlesCount = 200;
+
+let positions = [];
+
+for(let i=0;i<particlesCount;i++){
+  positions.push(
+    (Math.random()-0.5)*20,
+    (Math.random()-0.5)*20,
+    (Math.random()-0.5)*20
+  );
+}
+
+particlesGeometry.setAttribute(
+  'position',
+  new THREE.Float32BufferAttribute(positions,3)
+);
+
+let particlesMaterial = new THREE.PointsMaterial({
+  color:0x4da6ff,
+  size:0.05,
+  transparent:true,
+  opacity:0.6
+});
+
+let particles = new THREE.Points(particlesGeometry, particlesMaterial);
+scene.add(particles);
+
+// 💓 انیمیشن سینمایی
 function animate(){
   requestAnimationFrame(animate);
 
-  let t = Date.now()*0.003;
+  let t = Date.now()*0.002;
 
-  let beat = 1 + Math.sin(t)*0.08;
+  // ضربان سینمایی چند لایه
+  let beat =
+    1 +
+    Math.sin(t)*0.06 +
+    Math.sin(t*2)*0.03 +
+    Math.sin(t*0.5)*0.02;
 
   heart.scale.set(beat,beat,beat);
 
-  heart.rotation.y += 0.01;
+  // چرخش نرم
+  heart.rotation.y += 0.008;
+
+  // حرکت ذرات
+  particles.rotation.y += 0.001;
 
   renderer.render(scene,camera);
 }
 
 animate();
 
+// resize
 window.addEventListener('resize',()=>{
   camera.aspect = innerWidth/innerHeight;
   camera.updateProjectionMatrix();
