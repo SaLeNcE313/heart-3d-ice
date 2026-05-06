@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Ultimate Blue Anatomy Heart</title>
+<title>Cinematic Blue Heart Film</title>
 
 <style>
 body{
   margin:0;
   overflow:hidden;
-  background: radial-gradient(circle at center, #02030a, #000000);
+  background: radial-gradient(circle at center, #02040a, #000000);
 }
 
 /* امضا */
@@ -17,19 +17,19 @@ body{
   bottom:12px;
   width:100%;
   text-align:center;
-  color:rgba(120,200,255,0.6);
+  color:rgba(120,200,255,0.5);
   font-family:Arial;
   font-size:13px;
-  letter-spacing:2px;
+  letter-spacing:3px;
 }
 </style>
 </head>
 
 <body>
-
 <div class="signature">MAMALI</div>
 
 <script type="module">
+
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.128/build/three.module.js';
 import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.128/examples/jsm/loaders/GLTFLoader.js';
 import { EffectComposer } from 'https://cdn.jsdelivr.net/npm/three@0.128/examples/jsm/postprocessing/EffectComposer.js';
@@ -39,9 +39,9 @@ import { UnrealBloomPass } from 'https://cdn.jsdelivr.net/npm/three@0.128/exampl
 // Scene
 const scene = new THREE.Scene();
 
-// Camera
-const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 100);
-camera.position.z = 3;
+// Camera (cinematic lens feel)
+const camera = new THREE.PerspectiveCamera(55, innerWidth/innerHeight, 0.1, 100);
+camera.position.set(0,0,3.2);
 
 // Renderer
 const renderer = new THREE.WebGLRenderer({ antialias:true });
@@ -49,26 +49,27 @@ renderer.setSize(innerWidth, innerHeight);
 renderer.setPixelRatio(devicePixelRatio);
 document.body.appendChild(renderer.domElement);
 
-// 💡 نور سینمایی چندلایه
-const keyLight = new THREE.PointLight(0x4da6ff, 5);
-keyLight.position.set(3,3,3);
+// 🌌 نور سینمایی حجمی‌طور (fake volumetric)
+const keyLight = new THREE.PointLight(0x4da6ff, 6);
+keyLight.position.set(3,2,3);
 scene.add(keyLight);
 
-const fillLight = new THREE.PointLight(0x1a75ff, 3);
-fillLight.position.set(-3,-2,2);
-scene.add(fillLight);
+const rimLight = new THREE.PointLight(0x1a75ff, 4);
+rimLight.position.set(-3,-2,2);
+scene.add(rimLight);
 
-scene.add(new THREE.AmbientLight(0x001020));
+// ambient dark blue
+scene.add(new THREE.AmbientLight(0x000a1a));
 
-// ✨ Bloom حرفه‌ای (کلید سینمایی شدن)
+// 🎬 Bloom سینمایی قوی‌تر
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
 
 const bloom = new UnrealBloomPass(
   new THREE.Vector2(innerWidth, innerHeight),
-  2.5,   // intensity
-  0.35,
-  0.8
+  3.0,   // intensity بالا برای فیلمی شدن
+  0.3,
+  0.75
 );
 composer.addPass(bloom);
 
@@ -87,37 +88,45 @@ loader.load(
       if(o.isMesh){
         o.material.color = new THREE.Color(0x4da6ff);
         o.material.emissive = new THREE.Color(0x1a75ff);
-        o.material.emissiveIntensity = 1.5;
-        o.material.metalness = 0.25;
-        o.material.roughness = 0.12;
+        o.material.emissiveIntensity = 2.0; // glow قوی‌تر
+        o.material.metalness = 0.3;
+        o.material.roughness = 0.08;
       }
     });
 
-    heart.scale.set(1.7,1.7,1.7);
+    heart.scale.set(1.8,1.8,1.8);
     scene.add(heart);
   }
 );
 
-// 💓 انیمیشن سینمایی واقعی (breathing + float)
+// 🎥 انیمیشن سینمایی (breathing + camera drift)
 function animate(){
   requestAnimationFrame(animate);
 
+  let t = Date.now()*0.0018;
+
   if(heart){
 
-    let t = Date.now()*0.002;
-
-    // نفس کشیدن طبیعی
+    // ضربان واقعی‌تر
     let beat =
       1 +
-      Math.sin(t)*0.06 +
-      Math.sin(t*2)*0.02;
+      Math.sin(t)*0.07 +
+      Math.sin(t*2)*0.025;
 
     heart.scale.set(beat,beat,beat);
 
-    // حرکت سینمایی نرم
-    heart.rotation.y += 0.006;
-    heart.position.y = Math.sin(t*0.5)*0.05;
+    // چرخش خیلی نرم
+    heart.rotation.y += 0.004;
+
+    // حرکت “دوربین‌گونه” (حس فیلمی)
+    heart.position.x = Math.sin(t*0.3)*0.03;
+    heart.position.y = Math.cos(t*0.4)*0.03;
   }
+
+  // حرکت نرم دوربین (خیلی مهم برای cinematic feel)
+  camera.position.x = Math.sin(t*0.2)*0.05;
+  camera.position.y = Math.cos(t*0.25)*0.05;
+  camera.lookAt(0,0,0);
 
   composer.render();
 }
