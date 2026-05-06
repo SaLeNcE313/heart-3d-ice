@@ -1,123 +1,177 @@
 <!DOCTYPE html><html lang="fa">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Neon Heart</title>
-  <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: radial-gradient(circle at 20% 30%, #0a0f1f, #000 70%), #000;
-      font-family: Arial, sans-serif;
-      color: white;
-    }/* قلب */
-.heart {
-  width: 300px;
-  height: 300px;
-  background: url('https://i.imgur.com/4AiXzf8.png') no-repeat center/contain;
-  position: relative;
-  animation: beat 1.2s infinite;
-  filter: drop-shadow(0 0 25px cyan);
-  z-index: 2;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neon Heart Final</title>
+<style>
+body {
+  margin:0;
+  overflow:hidden;
+  background: radial-gradient(circle at center, #040814, #000);
 }
-
-@keyframes beat {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.12); }
+canvas{position:absolute;top:0;left:0}
+.signature{
+  position:absolute;
+  bottom:20px;
+  width:100%;
+  text-align:center;
+  color:rgba(255,255,255,0.7);
+  text-shadow:0 0 12px cyan;
+  letter-spacing:4px;
+  font-family:Arial;
 }
-
-canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 1;
-}
-
-/* امضا */
-.signature {
-  position: absolute;
-  bottom: 20px;
-  width: 100%;
-  text-align: center;
-  font-size: 18px;
-  letter-spacing: 3px;
-  color: rgba(255,255,255,0.7);
-  text-shadow: 0 0 10px cyan;
-  z-index: 3;
-}
-
-  </style>
+</style>
 </head>
-<body><div class="heart"></div>
-<div class="signature">SaLeNcE</div>
-<canvas id="particles"></canvas><script>
-const canvas = document.getElementById('particles');
-const ctx = canvas.getContext('2d');
+<body><canvas id="c"></canvas>
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+<div class="signature">SaLeNcE</div><script>
+const canvas=document.getElementById('c');
+const ctx=canvas.getContext('2d');
+canvas.width=innerWidth;
+canvas.height=innerHeight;
 
-let particles = [];
-let stars = [];
+let t=0;
+let mouseX=canvas.width/2;
+let mouseY=canvas.height/2;
 
-// ذرات نورانی
-for (let i = 0; i < 120; i++) {
-  particles.push({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
-    size: Math.random() * 2,
-    speedX: (Math.random() - 0.5) * 0.5,
-    speedY: (Math.random() - 0.5) * 0.5
-  });
+window.addEventListener('mousemove',e=>{
+  mouseX=e.clientX;
+  mouseY=e.clientY;
+});
+
+function heartPath(size){
+  let points=[];
+  for(let i=0;i<Math.PI*2;i+=0.05){
+    let x=size*16*Math.pow(Math.sin(i),3);
+    let y=-size*(13*Math.cos(i)-5*Math.cos(2*i)-2*Math.cos(3*i)-Math.cos(4*i));
+    points.push({x,y});
+  }
+  return points;
 }
 
-// ستاره‌های پس‌زمینه
-for (let i = 0; i < 200; i++) {
+const baseHeart=heartPath(10);
+
+function drawHeart(x,y,scale,rot){
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.rotate(rot);
+
+  ctx.beginPath();
+  baseHeart.forEach((p,i)=>{
+    let nx=p.x*scale;
+    let ny=p.y*scale;
+    if(i===0) ctx.moveTo(nx,ny);
+    else ctx.lineTo(nx,ny);
+  });
+  ctx.closePath();
+
+  // glow
+  ctx.shadowBlur=30+Math.sin(t)*15;
+  ctx.shadowColor="cyan";
+
+  let g=ctx.createRadialGradient(0,0,20,0,0,300);
+  g.addColorStop(0,'#00f0ff');
+  g.addColorStop(1,'#001a2f');
+
+  ctx.fillStyle=g;
+  ctx.fill();
+
+  // veins (energy lines)
+  ctx.strokeStyle='rgba(0,255,255,0.6)';
+  ctx.lineWidth=1;
+  ctx.beginPath();
+  for(let i=0;i<20;i++){
+    ctx.moveTo(0,0);
+    let p=baseHeart[Math.floor(Math.random()*baseHeart.length)];
+    ctx.lineTo(p.x*scale,p.y*scale);
+  }
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+// particles (stars)
+let stars=[];
+for(let i=0;i<250;i++){
   stars.push({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
-    size: Math.random() * 1.5,
-    opacity: Math.random()
+    x:Math.random()*canvas.width,
+    y:Math.random()*canvas.height,
+    z:Math.random()*2,
+    s:Math.random()*2
   });
 }
 
-function animate() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // رسم ستاره‌ها
-  stars.forEach(s => {
-    ctx.beginPath();
-    ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(255,255,255,${s.opacity})`;
-    ctx.fill();
-  });
-
-  // ذرات نورانی
-  particles.forEach(p => {
-    p.x += p.speedX;
-    p.y += p.speedY;
-
-    if (p.x < 0 || p.x > canvas.width) p.speedX *= -1;
-    if (p.y < 0 || p.y > canvas.height) p.speedY *= -1;
+function drawStars(){
+  stars.forEach(s=>{
+    let dx=(mouseX-canvas.width/2)*0.0008*s.z;
+    let dy=(mouseY-canvas.height/2)*0.0008*s.z;
 
     ctx.beginPath();
-    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(0,255,255,0.8)';
+    ctx.arc(s.x+dx,s.y+dy,s.s,0,Math.PI*2);
+    ctx.fillStyle='rgba(0,255,255,0.8)';
     ctx.fill();
   });
+}
 
+// lightning
+let bolts=[];
+function createBolt(){
+  bolts.push({life:8});
+}
+
+function drawBolts(){
+  bolts.forEach((b,i)=>{
+    ctx.beginPath();
+    let x=canvas.width/2;
+    let y=canvas.height/2;
+    ctx.moveTo(x,y);
+    for(let j=0;j<12;j++){
+      x+=(Math.random()-0.5)*25;
+      y+=(Math.random()-0.5)*25;
+      ctx.lineTo(x,y);
+    }
+    ctx.strokeStyle='rgba(0,255,255,0.9)';
+    ctx.stroke();
+
+    b.life--;
+    if(b.life<=0) bolts.splice(i,1);
+  });
+}
+
+// cold vapor effect
+function drawVapor(){
+  ctx.fillStyle='rgba(0,255,255,0.05)';
+  ctx.beginPath();
+  ctx.arc(canvas.width/2,canvas.height/2,200+Math.sin(t)*20,0,Math.PI*2);
+  ctx.fill();
+}
+
+function animate(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  drawStars();
+
+  if(Math.random()<0.2) createBolt();
+
+  let scale=1+Math.sin(t)*0.08;
+  let rot=t*0.15;
+
+  let dx=(mouseX-canvas.width/2)*0.05;
+  let dy=(mouseY-canvas.height/2)*0.05;
+
+  drawHeart(canvas.width/2+dx,canvas.height/2+dy,scale,rot);
+  drawBolts();
+  drawVapor();
+
+  t+=0.05;
   requestAnimationFrame(animate);
 }
 
 animate();
 
-window.addEventListener('resize', () => {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+window.addEventListener('resize',()=>{
+  canvas.width=innerWidth;
+  canvas.height=innerHeight;
 });
 </script></body>
 </html>
