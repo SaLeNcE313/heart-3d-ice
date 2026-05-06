@@ -1,76 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>3D Heart Fixed</title>
-  <style>
-    body { margin: 0; overflow: hidden; background: black; }
-  </style>
+<meta charset="UTF-8">
+<title>Real Heart Pro</title>
+
+<style>
+  body { margin:0; overflow:hidden; background:black; }
+
+  /* امضا */
+  .signature {
+    position: fixed;
+    bottom: 15px;
+    width: 100%;
+    text-align: center;
+    color: rgba(255,255,255,0.7);
+    font-size: 14px;
+    font-family: 'Segoe UI', sans-serif;
+    letter-spacing: 2px;
+  }
+</style>
 </head>
+
 <body>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<div class="signature">MAMALI</div>
 
-<script>
-let scene = new THREE.Scene();
-let camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.1, 1000);
-let renderer = new THREE.WebGLRenderer({antialias:true});
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.128/build/three.module.js';
+import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.128/examples/jsm/loaders/GLTFLoader.js';
+import { EffectComposer } from 'https://cdn.jsdelivr.net/npm/three@0.128/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'https://cdn.jsdelivr.net/npm/three@0.128/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'https://cdn.jsdelivr.net/npm/three@0.128/examples/jsm/postprocessing/UnrealBloomPass.js';
 
+// صحنه
+const scene = new THREE.Scene();
+
+// دوربین
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 100);
+camera.position.z = 3;
+
+// رندر
+const renderer = new THREE.WebGLRenderer({ antialias:true });
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
 document.body.appendChild(renderer.domElement);
 
-// نور
-let light = new THREE.PointLight(0xff3366, 2, 100);
-light.position.set(0, 0, 10);
-scene.add(light);
+// نور سینمایی
+const light1 = new THREE.PointLight(0xff0040, 4);
+light1.position.set(2,2,3);
+scene.add(light1);
 
-scene.add(new THREE.AmbientLight(0x550000));
+const light2 = new THREE.PointLight(0xffffff, 2);
+light2.position.set(-2,-1,2);
+scene.add(light2);
 
-// متریال براق
-let material = new THREE.MeshStandardMaterial({
-  color: 0xff1a4d,
-  roughness: 0.3,
-  metalness: 0.6
-});
+scene.add(new THREE.AmbientLight(0x220000));
 
-// قلب نرم‌تر
-let heartShape = new THREE.Shape();
+// افکت Bloom (درخشش)
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
 
-heartShape.moveTo(0, 0);
-heartShape.bezierCurveTo(0, 2.5, -3, 2.5, -3, 0);
-heartShape.bezierCurveTo(-3, -2, 0, -3.5, 0, -5);
-heartShape.bezierCurveTo(0, -3.5, 3, -2, 3, 0);
-heartShape.bezierCurveTo(3, 2.5, 0, 2.5, 0, 0);
+const bloom = new UnrealBloomPass(
+  new THREE.Vector2(window.innerWidth, window.innerHeight),
+  1.5, // شدت
+  0.4,
+  0.85
+);
+composer.addPass(bloom);
 
-let geometry = new THREE.ExtrudeGeometry(heartShape, {
-  depth: 1.5,
-  bevelEnabled: true,
-  bevelSegments: 5,
-  steps: 2,
-  bevelSize: 0.5,
-  bevelThickness: 0.5
-});
+// لود مدل
+const loader = new GLTFLoader();
+let heart;
 
-let heart = new THREE.Mesh(geometry, material);
-scene.add(heart);
+loader.load(
+  'https://threejs.org/examples/models/gltf/Heart.glb',
+  (gltf) => {
+    heart = gltf.scene;
 
-camera.position.z = 10;
+    heart.traverse((child) => {
+      if (child.isMesh) {
+        child.material.metalness = 0.8;
+        child.material.roughness = 0.2;
+        child.material.color.set(0xff1a4d);
+      }
+    });
+
+    heart.scale.set(1.5,1.5,1.5);
+    heart.rotation.x = Math.PI;
+
+    scene.add(heart);
+  }
+);
 
 // انیمیشن
 function animate() {
   requestAnimationFrame(animate);
 
-  heart.rotation.y += 0.01;
+  if (heart) {
+    heart.rotation.y += 0.01;
 
-  let t = Date.now() * 0.004;
-  let beat = 1 + Math.sin(t) * 0.15 + Math.sin(t*2)*0.05;
-  heart.scale.set(beat, beat, beat);
+    let t = Date.now() * 0.002;
 
-  renderer.render(scene, camera);
+    // ضربان واقعی‌تر (دو مرحله‌ای)
+    let beat =
+      1 +
+      Math.sin(t) * 0.08 +
+      Math.sin(t * 2) * 0.04 +
+      Math.sin(t * 0.5) * 0.02;
+
+    heart.scale.set(beat, beat, beat);
+  }
+
+  composer.render();
 }
 
 animate();
 
+// ریسپانسیو
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth/window.innerHeight;
   camera.updateProjectionMatrix();
