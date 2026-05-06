@@ -6,35 +6,54 @@
   <style>
     body {
       margin: 0;
-      background: radial-gradient(circle at center, #0a0f1f, #000);
       overflow: hidden;
       height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-    }.heart {
+      background: radial-gradient(circle at 20% 30%, #0a0f1f, #000 70%), #000;
+      font-family: Arial, sans-serif;
+      color: white;
+    }/* قلب */
+.heart {
   width: 300px;
   height: 300px;
   background: url('https://i.imgur.com/4AiXzf8.png') no-repeat center/contain;
   position: relative;
   animation: beat 1.2s infinite;
-  filter: drop-shadow(0 0 20px cyan);
+  filter: drop-shadow(0 0 25px cyan);
+  z-index: 2;
 }
 
 @keyframes beat {
   0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+  50% { transform: scale(1.12); }
 }
 
 canvas {
   position: absolute;
   top: 0;
   left: 0;
+  z-index: 1;
+}
+
+/* امضا */
+.signature {
+  position: absolute;
+  bottom: 20px;
+  width: 100%;
+  text-align: center;
+  font-size: 18px;
+  letter-spacing: 3px;
+  color: rgba(255,255,255,0.7);
+  text-shadow: 0 0 10px cyan;
+  z-index: 3;
 }
 
   </style>
 </head>
 <body><div class="heart"></div>
+<div class="signature">SaLeNcE</div>
 <canvas id="particles"></canvas><script>
 const canvas = document.getElementById('particles');
 const ctx = canvas.getContext('2d');
@@ -43,7 +62,9 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 let particles = [];
+let stars = [];
 
+// ذرات نورانی
 for (let i = 0; i < 120; i++) {
   particles.push({
     x: Math.random() * canvas.width,
@@ -54,7 +75,49 @@ for (let i = 0; i < 120; i++) {
   });
 }
 
+// ستاره‌های پس‌زمینه
+for (let i = 0; i < 200; i++) {
+  stars.push({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    size: Math.random() * 1.5,
+    opacity: Math.random()
+  });
+}
+
 function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+  // رسم ستاره‌ها
+  stars.forEach(s => {
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255,255,255,${s.opacity})`;
+    ctx.fill();
+  });
+
+  // ذرات نورانی
   particles.forEach(p => {
+    p.x += p.speedX;
+    p.y += p.speedY;
+
+    if (p.x < 0 || p.x > canvas.width) p.speedX *= -1;
+    if (p.y < 0 || p.y > canvas.height) p.speedY *= -1;
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(0,255,255,0.8)';
+    ctx.fill();
+  });
+
+  requestAnimationFrame(animate);
+}
+
+animate();
+
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+</script></body>
+</html>
