@@ -24,8 +24,8 @@ body{
 
   background:
   radial-gradient(circle at center,
-  #11233b 0%,
-  #050b14 45%,
+  #14263d 0%,
+  #07111d 40%,
   #000000 100%);
 }
 
@@ -34,28 +34,27 @@ body{
   position:relative;
   width:100%;
   height:100%;
-
   display:flex;
   justify-content:center;
   align-items:center;
 }
 
-/* نور پشت */
+/* نور محیط */
 .glow{
   position:absolute;
 
-  width:340px;
-  height:340px;
+  width:350px;
+  height:350px;
 
   border-radius:50%;
 
   background:
   radial-gradient(circle,
-  rgba(80,190,255,.35) 0%,
-  rgba(80,190,255,.08) 45%,
+  rgba(90,180,255,.35) 0%,
+  rgba(90,180,255,.08) 40%,
   transparent 70%);
 
-  filter:blur(45px);
+  filter:blur(50px);
 
   animation:pulseGlow 4s ease-in-out infinite;
 }
@@ -63,9 +62,7 @@ body{
 /* قلب */
 .heart{
   position:relative;
-
-  width:220px;
-
+  width:240px;
   z-index:5;
 
   animation:
@@ -73,15 +70,15 @@ body{
   floating 5s ease-in-out infinite;
 
   filter:
-  drop-shadow(0 0 8px #7fd3ff)
-  drop-shadow(0 0 18px #4da6ff)
-  drop-shadow(0 0 40px rgba(77,166,255,.55));
+  drop-shadow(0 0 10px #7fd3ff)
+  drop-shadow(0 0 25px #4da6ff)
+  drop-shadow(0 0 45px rgba(77,166,255,.55));
 }
 
-/* تصویر قلب */
-.heart img{
+/* SVG */
+svg{
   width:100%;
-  display:block;
+  height:auto;
 }
 
 /* ذرات */
@@ -93,11 +90,11 @@ body{
 
   border-radius:50%;
 
-  background:#8ad7ff;
+  background:#8fdcff;
 
   box-shadow:
-  0 0 8px #8ad7ff,
-  0 0 18px #4da6ff;
+  0 0 10px #8fdcff,
+  0 0 20px #4da6ff;
 
   opacity:0;
 
@@ -120,7 +117,7 @@ body{
   letter-spacing:4px;
 }
 
-/* نفس کشیدن */
+/* نفس */
 @keyframes breathe{
 
   0%,100%{
@@ -132,7 +129,7 @@ body{
   }
 }
 
-/* شناور بودن */
+/* شناوری */
 @keyframes floating{
 
   0%,100%{
@@ -158,7 +155,7 @@ body{
   }
 }
 
-/* حرکت ذرات */
+/* ذرات */
 @keyframes particleMove{
 
   0%{
@@ -193,18 +190,47 @@ body{
 
 <div class="heart">
 
-<img src="https://i.imgur.com/6qK0F9Y.png">
+<!-- قلب SVG -->
+<svg viewBox="0 0 512 512">
+
+<defs>
+
+<linearGradient id="heartGrad"
+x1="0%" y1="0%"
+x2="100%" y2="100%">
+
+<stop offset="0%" stop-color="#c8f1ff"/>
+<stop offset="35%" stop-color="#73cfff"/>
+<stop offset="70%" stop-color="#338dff"/>
+<stop offset="100%" stop-color="#1d4fff"/>
+
+</linearGradient>
+
+</defs>
+
+<path fill="url(#heartGrad)"
+d="
+M256 480
+C220 430 120 360 90 250
+C65 160 120 80 200 90
+C240 95 260 120 256 145
+C252 120 272 95 312 90
+C392 80 447 160 422 250
+C392 360 292 430 256 480
+"/>
+
+</svg>
 
 </div>
 
 </div>
 
-<div class="signature">MAMALI</div>
+<div class="signature">SaLeNcE</div>
 
 <script>
 
-/* ساخت ذرات */
-for(let i=0;i<60;i++){
+/* ذرات */
+for(let i=0;i<65;i++){
 
   const p = document.createElement("div");
 
@@ -215,12 +241,12 @@ for(let i=0;i<60;i++){
 
   p.style.setProperty(
     "--x",
-    (Math.random()*280-140)+"px"
+    (Math.random()*320-160)+"px"
   );
 
   p.style.setProperty(
     "--y",
-    (Math.random()*280-140)+"px"
+    (Math.random()*320-160)+"px"
   );
 
   p.style.animationDuration =
