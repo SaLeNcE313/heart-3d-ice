@@ -1,107 +1,198 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Blue Heart Safe</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Blue Anatomy Heart</title>
 
 <style>
-body{
+*{
   margin:0;
-  overflow:hidden;
-  background: radial-gradient(circle at center, #02040a, #000000);
+  padding:0;
+  box-sizing:border-box;
 }
 
-canvas{ display:block; }
+body{
+  width:100%;
+  height:100vh;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at center,
+    #07111f 0%,
+    #02060d 40%,
+    #000000 100%);
+    
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-family:Arial,sans-serif;
+}
 
+/* لایه نور محیط */
+.bgGlow{
+  position:absolute;
+  width:500px;
+  height:500px;
+  background:radial-gradient(circle,
+  rgba(77,166,255,.25) 0%,
+  rgba(77,166,255,.08) 35%,
+  transparent 70%);
+  filter:blur(40px);
+  animation:bgPulse 4s ease-in-out infinite;
+}
+
+/* قلب */
+.heart{
+  position:relative;
+  font-size:190px;
+  line-height:1;
+  z-index:2;
+
+  filter:
+    drop-shadow(0 0 8px #4da6ff)
+    drop-shadow(0 0 20px #1a75ff)
+    drop-shadow(0 0 40px rgba(77,166,255,.7));
+
+  animation:
+    breathe 3.5s ease-in-out infinite,
+    floatHeart 6s ease-in-out infinite;
+}
+
+/* درخشش روی قلب */
+.heart::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at 35% 30%,
+  rgba(255,255,255,.45),
+  transparent 45%);
+  mix-blend-mode:screen;
+  pointer-events:none;
+}
+
+/* ذرات */
+.particle{
+  position:absolute;
+  width:4px;
+  height:4px;
+  border-radius:50%;
+  background:#6bbcff;
+  box-shadow:
+    0 0 10px #4da6ff,
+    0 0 20px #4da6ff;
+
+  opacity:0;
+  z-index:1;
+
+  animation:
+    particleMove linear infinite;
+}
+
+/* امضا */
 .signature{
   position:fixed;
-  bottom:10px;
+  bottom:14px;
   width:100%;
   text-align:center;
-  color:rgba(120,200,255,0.6);
-  font-family:Arial;
-  font-size:13px;
-  letter-spacing:2px;
+  color:rgba(140,200,255,.5);
+  font-size:12px;
+  letter-spacing:4px;
+}
+
+/* انیمیشن نفس */
+@keyframes breathe{
+  0%,100%{
+    transform:scale(1);
+  }
+  50%{
+    transform:scale(1.08);
+  }
+}
+
+/* شناور بودن نرم */
+@keyframes floatHeart{
+  0%,100%{
+    transform:translateY(0px);
+  }
+  50%{
+    transform:translateY(-8px);
+  }
+}
+
+/* نور زمینه */
+@keyframes bgPulse{
+  0%,100%{
+    transform:scale(1);
+    opacity:.7;
+  }
+  50%{
+    transform:scale(1.1);
+    opacity:1;
+  }
+}
+
+/* حرکت ذرات */
+@keyframes particleMove{
+  0%{
+    transform:
+      translate(0,0)
+      scale(.2);
+    opacity:0;
+  }
+
+  20%{
+    opacity:1;
+  }
+
+  100%{
+    transform:
+      translate(var(--x),var(--y))
+      scale(1.4);
+    opacity:0;
+  }
 }
 </style>
 </head>
 
 <body>
+
+<div class="bgGlow"></div>
+
+<div class="heart" id="heart">
+🫀
+</div>
+
 <div class="signature">MAMALI</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
 <script>
+const heart = document.getElementById("heart");
 
-// Scene
-const scene = new THREE.Scene();
+/* ساخت ذرات */
+for(let i=0;i<70;i++){
 
-// Camera
-const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 100);
-camera.position.z = 6;
+  const p = document.createElement("div");
+  p.className = "particle";
 
-// Renderer
-const renderer = new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(innerWidth, innerHeight);
-document.body.appendChild(renderer.domElement);
+  // موقعیت اولیه نزدیک قلب
+  p.style.left = "50%";
+  p.style.top = "50%";
 
-// Light
-const light = new THREE.PointLight(0x4da6ff, 3);
-light.position.set(2,2,3);
-scene.add(light);
+  // حرکت تصادفی
+  const x = (Math.random()*300 - 150) + "px";
+  const y = (Math.random()*300 - 150) + "px";
 
-scene.add(new THREE.AmbientLight(0x001122));
+  p.style.setProperty("--x", x);
+  p.style.setProperty("--y", y);
 
-// 💙 قلب واقعی بدون مدل خارجی (geometry)
-let shape = new THREE.Shape();
+  // زمان تصادفی
+  p.style.animationDuration =
+    (2 + Math.random()*3) + "s";
 
-shape.moveTo(0,0);
-shape.bezierCurveTo(0,2,-2,2,-2,0);
-shape.bezierCurveTo(-2,-2,0,-3,0,-4);
-shape.bezierCurveTo(0,-3,2,-2,2,0);
-shape.bezierCurveTo(2,2,0,2,0,0);
+  p.style.animationDelay =
+    (Math.random()*3) + "s";
 
-let geometry = new THREE.ExtrudeGeometry(shape,{
-  depth:1.5,
-  bevelEnabled:true,
-  bevelSize:0.4,
-  bevelThickness:0.4
-});
-
-let material = new THREE.MeshStandardMaterial({
-  color:0x4da6ff,
-  emissive:0x1a75ff,
-  emissiveIntensity:1.2,
-  metalness:0.2,
-  roughness:0.2
-});
-
-let heart = new THREE.Mesh(geometry, material);
-scene.add(heart);
-
-// 💓 animation
-function animate(){
-  requestAnimationFrame(animate);
-
-  let t = Date.now()*0.002;
-
-  let beat = 1 + Math.sin(t)*0.08;
-
-  heart.scale.set(beat,beat,beat);
-
-  heart.rotation.y += 0.008;
-
-  renderer.render(scene,camera);
+  document.body.appendChild(p);
 }
-
-animate();
-
-window.addEventListener('resize',()=>{
-  camera.aspect = innerWidth/innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight);
-});
-
 </script>
 
 </body>
