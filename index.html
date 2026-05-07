@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Blue Anatomy Heart</title>
+<title>Cinematic Blue Heart</title>
 
 <style>
 
@@ -24,54 +24,64 @@ body{
 
   background:
   radial-gradient(circle at center,
-  #122033 0%,
-  #050b14 40%,
+  #11233b 0%,
+  #050b14 45%,
   #000000 100%);
 }
 
-/* نور پشت قلب */
+/* صحنه */
+.scene{
+  position:relative;
+  width:100%;
+  height:100%;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+/* نور پشت */
 .glow{
   position:absolute;
 
-  width:350px;
-  height:350px;
+  width:340px;
+  height:340px;
 
   border-radius:50%;
 
   background:
   radial-gradient(circle,
-  rgba(80,180,255,.35) 0%,
-  rgba(80,180,255,.08) 40%,
+  rgba(80,190,255,.35) 0%,
+  rgba(80,190,255,.08) 45%,
   transparent 70%);
 
-  filter:blur(40px);
+  filter:blur(45px);
 
-  animation:pulse 4s ease-in-out infinite;
+  animation:pulseGlow 4s ease-in-out infinite;
 }
 
 /* قلب */
 .heart{
   position:relative;
-  z-index:2;
 
   width:220px;
 
+  z-index:5;
+
   animation:
   breathe 3s ease-in-out infinite,
-  floatHeart 5s ease-in-out infinite;
+  floating 5s ease-in-out infinite;
 
   filter:
-  drop-shadow(0 0 10px #69c7ff)
-  drop-shadow(0 0 25px #4da6ff)
-  drop-shadow(0 0 40px rgba(77,166,255,.6));
+  drop-shadow(0 0 8px #7fd3ff)
+  drop-shadow(0 0 18px #4da6ff)
+  drop-shadow(0 0 40px rgba(77,166,255,.55));
 }
 
 /* تصویر قلب */
 .heart img{
   width:100%;
   display:block;
-
-  opacity:.95;
 }
 
 /* ذرات */
@@ -83,16 +93,16 @@ body{
 
   border-radius:50%;
 
-  background:#7fd3ff;
+  background:#8ad7ff;
 
   box-shadow:
-  0 0 10px #7fd3ff,
-  0 0 20px #4da6ff;
+  0 0 8px #8ad7ff,
+  0 0 18px #4da6ff;
 
   opacity:0;
 
   animation:
-  move linear infinite;
+  particleMove linear infinite;
 }
 
 /* امضا */
@@ -105,13 +115,14 @@ body{
 
   color:rgba(180,220,255,.35);
 
-  font-family:Arial;
+  font-family:Arial,sans-serif;
   font-size:11px;
   letter-spacing:4px;
 }
 
-/* نفس */
+/* نفس کشیدن */
 @keyframes breathe{
+
   0%,100%{
     transform:scale(1);
   }
@@ -121,8 +132,9 @@ body{
   }
 }
 
-/* شناوری */
-@keyframes floatHeart{
+/* شناور بودن */
+@keyframes floating{
+
   0%,100%{
     transform:translateY(0px);
   }
@@ -133,20 +145,21 @@ body{
 }
 
 /* نور */
-@keyframes pulse{
+@keyframes pulseGlow{
+
   0%,100%{
-    transform:scale(1);
     opacity:.7;
+    transform:scale(1);
   }
 
   50%{
-    transform:scale(1.08);
     opacity:1;
+    transform:scale(1.08);
   }
 }
 
-/* ذرات */
-@keyframes move{
+/* حرکت ذرات */
+@keyframes particleMove{
 
   0%{
     transform:
@@ -163,7 +176,7 @@ body{
   100%{
     transform:
     translate(var(--x),var(--y))
-    scale(1.3);
+    scale(1.4);
 
     opacity:0;
   }
@@ -174,6 +187,8 @@ body{
 
 <body>
 
+<div class="scene">
+
 <div class="glow"></div>
 
 <div class="heart">
@@ -182,12 +197,14 @@ body{
 
 </div>
 
+</div>
+
 <div class="signature">MAMALI</div>
 
 <script>
 
-/* ذرات */
-for(let i=0;i<55;i++){
+/* ساخت ذرات */
+for(let i=0;i<60;i++){
 
   const p = document.createElement("div");
 
@@ -198,12 +215,12 @@ for(let i=0;i<55;i++){
 
   p.style.setProperty(
     "--x",
-    (Math.random()*260-130)+"px"
+    (Math.random()*280-140)+"px"
   );
 
   p.style.setProperty(
     "--y",
-    (Math.random()*260-130)+"px"
+    (Math.random()*280-140)+"px"
   );
 
   p.style.animationDuration =
